@@ -1,4 +1,9 @@
-# aurelia-skeleton-navigation
+# bom-campaign-analyzer
+
+Based on [aurelia-skeleton-navigation](https://github.com/aurelia/skeleton-navigation).
+
+Aurelia app for wireless telecom company to import sim card provisioning info for analysis, export data for reprocessing, etc.
+This source code includes user interface code with all back end services and data faked.
 
 [![ZenHub](https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png)](https://zenhub.io)
 [![Join the chat at https://gitter.im/aurelia/discuss](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aurelia/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -75,50 +80,3 @@ You can also unbundle using the command bellow:
   ```shell
   gulp unbundle
   ```
-
-## Running The Unit Tests
-
-To run the unit tests, first ensure that you have followed the steps above in order to install all dependencies and successfully build the library. Once you have done that, proceed with these additional steps:
-
-1. Ensure that the [Karma](http://karma-runner.github.io/) CLI is installed. If you need to install it, use the following command:
-
-  ```shell
-  npm install -g karma-cli
-  ```
-2. Install Aurelia libs for test visibility:
-
-```shell
-jspm install aurelia-framework
-jspm install aurelia-http-client
-jspm install aurelia-router
-```
-3. You can now run the tests with this command:
-
-  ```shell
-  karma start
-  ```
-
-## Running The E2E Tests
-Integration tests are performed with [Protractor](http://angular.github.io/protractor/#/).
-
-1. Place your E2E-Tests into the folder ```test/e2e/src```
-2. Install the necessary webdriver
-
-  ```shell
-  gulp webdriver_update
-  ```
-
-3. Configure the path to the webdriver by opening the file ```protractor.conf.js``` and adjusting the ```seleniumServerJar``` property. Typically its only needed to adjust the version number.
-
-4. Make sure your app runs and is accessible
-
-  ```shell
-  gulp watch
-  ```
-
-5. In another console run the E2E-Tests
-
-  ```shell
-  gulp e2e
-  ```
-"# bom-campaign-analyzer" 

@@ -1,0 +1,141 @@
+<template>
+  <section class="au-animate">
+    <h4 class="pull-right">Current Environment: <span class="bom-green">${environment}</span></h4>
+
+    <div>
+      <div show.bind="errorMessage">
+        <div class="top-buffer"></div>
+        <div class="alert alert-danger" role="alert"><strong>Yikes! </strong>
+          <pre>${errorMessage}</pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2 class="col-sm-8 col-sm-offset-2">${heading}</h2>
+      </div>
+
+      <form class="form-horizontal" role="form" submit.delegate="submit()" id="imsi-form">
+
+        <div class="form-group ${imsiValidationClass}">
+          <label class="col-sm-2 control-label" for="imsi">Enter IMSI:</label>
+
+          <div class="col-sm-5">
+            <input name="Imsi" aurelia-autofocus
+                   value.bind="imsi" class="form-control" id="imsi"
+                   change.delegate="validate()">
+            </input>
+          </div>
+          <div class="col-sm-5">
+          <span show.bind="imsiValidationClass === 'has-error'" id="imsiRequired"
+                class="help-block">An IMSI must be entered.</span>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-3">
+            <button type="submit" class="form-control btn btn-primary">Get IMSI History</button>
+          </div>
+          <div show.bind="showValidationErrors && !isValid" class="col-sm-5 has-error">
+            <div class="help-block" role="alert">Please make the required changes and try again.</div>
+          </div>
+        </div>
+      </form>
+
+
+      <p show.bind="loadingHistory">
+        <i id="" class="fa fa-spinner fa-spin fa-2x"></i> Loading history for IMSI ${imsi}
+      </p>
+
+      <div show.bind="historyLoaded">
+
+        <h3>History for IMSI: <strong><span class="bom-green">${imsiLoaded}</span></strong></h3>
+
+        <h3><strong class="imsiLookupLabel">Current BCA Status:</strong><i> ${currentBcaStatus}</i></h3>
+        <h3><strong class="imsiLookupLabel">Current HLRALL Status:</strong><i> ${currentHlrallStatus}</i></h3>
+        <h2>BOM Campaign Analyzer History</h2>
+
+        <grid id="campaign-history-grid"
+              read.call="fetchCampaignAnalysisHistory($event)"
+              server-filtering.bind="true"
+              pageable.bind="false"
+              sortable.bind="false"
+              no-rows-message="Sorry, no campaign analyzer records found"
+              grid-height.bind="400">
+          <grid-row>
+            <grid-col class="col-sm-1" heading="Date" field="CreateTime">
+              ${ $item.CreateTime | dateFormat:'M/D/YYYY' } <br>
+              ${ $item.CreateTime | dateFormat:'h:mm:ss a' }
+            </grid-col>
+            <grid-col class="col-sm-1" heading="Action" field="Action">${ $item.Action }</grid-col>
+            <grid-col class="col-sm-1" heading="BCA Status" field="ImsiStatus">${ $item.ImsiStatus }</grid-col>
+            <grid-col class="col-sm-1" heading="HLRALL Status" field="IsInHlrAll">
+              ${ $item.IsInHlrAll}
+            </grid-col>
+            <grid-col class="col-sm-2" heading="Most Recent Serial Number Tracking Status" field="TrackingStatus">
+              ${ $item.Workflow}: <br>
+              ${ $item.TrackingStatus }
+            </grid-col>
+            <grid-col class="col-sm-1" heading="Provisioned MDN" field="ProvisionedMdn">
+              <div show.bind="!!$item.ProvisionedMdn">${ $item.ProvisionedMdn }</div>
+              <div show.bind="!$item.ProvisionedMdn">None</div>
+            </grid-col>
+            <grid-col class="col-sm-1" heading="MDN Pending Provisioning" field="PendingMdn">
+              <div show.bind="!!$item.PendingMdn">${ $item.PendingMdn }</div>
+              <div show.bind="!$item.PendingMdn">None</div>
+            </grid-col>
+            <grid-col class="col-sm-1" heading="Is Provisioning On Hold" field="IsProvisioningOnHold">
+              ${ $item.IsProvisioningOnHold }
+            </grid-col>
+            <grid-col class="col-sm-1" heading="SLD Target Spec" field="TargetSpec">${ $item.TargetSpec }</grid-col>
+            <grid-col class="col-sm-1" heading="User" field="Username">${ $item.Username }</grid-col>
+          </grid-row>
+        </grid>
+
+        <h2>Serial Number Tracking History</h2>
+
+        <grid id="serial-number-history-grid"
+              read.call="fetchSerialNumberTrackingAnalysisHistory($event)"
+              server-filtering.bind="true"
+              pageable.bind="false"
+              sortable.bind="false"
+              no-rows-message="Sorry, no serial number history records found">
+          <grid-row>
+            <grid-col class="col-sm-1" heading="Date" field="ModifyTime">
+              ${ $item.ModifyTime | dateFormat:'M/D/YYYY' } <br>
+              ${ $item.ModifyTime | dateFormat:'h:mm:ss a' }
+            </grid-col>
+            <grid-col class="col-sm-2" heading="Workflow and Tracking Status" field="TrackingStatus">
+              ${ $item.Workflow}: <br>
+              ${ $item.TrackingStatus }
+            </grid-col>
+            <grid-col class="col-sm-1" heading="Provisioned MDN" field="ProvisionedMdn">
+              <div show.bind="!!$item.ProvisionedMdn">${ $item.ProvisionedMdn }</div>
+              <div show.bind="!$item.ProvisionedMdn">None</div>
+            </grid-col>
+            <grid-col class="col-sm-1" heading="MDN Pending Provisioning" field="PendingMdn">
+              <div show.bind="!!$item.PendingMdn">${ $item.PendingMdn }</div>
+              <div show.bind="!$item.PendingMdn">None</div>
+            </grid-col>
+            <grid-col class="col-sm-2" heading="Most Recent Device Discovery Information"
+                      field="MostRecentDeviceDiscoveryProductDescription">
+              <div show.bind="!!$item.MostRecentDeviceDiscoveryDate">
+                <strong>Device:</strong> ${ $item.MostRecentDeviceDiscoveryProductDescription } <br>
+                <strong>Device SKU:</strong> ${ $item.MostRecentDeviceDiscoveryWarehouseSku } <br>
+                <strong>Hex SN:</strong> ${ $item.MostRecentDeviceDiscoveryHexSerialNumber } <br>
+                <strong>Dec SN:</strong> ${ $item.MostRecentDeviceDiscoveryDecSerialNumber } <br>
+                <strong>Device Discovery Date:</strong> ${ $item.MostRecentDeviceDiscoveryDate | dateFormat:'M/D/YYYY
+                h:mm:ss a' }
+              </div>
+              <div show.bind="!$item.MostRecentDeviceDiscoveryDate">None</div>
+            </grid-col>
+            <grid-col class="col-sm-1" heading="SIM Card Usage Type" field="Usage">${ $item.Usage }</grid-col>
+            <grid-col class="col-sm-1" heading="Updated By" field="Username">${ $item.Username }</grid-col>
+          </grid-row>
+        </grid>
+      </div>
+    </div>
+  </section>
+</template>
+
