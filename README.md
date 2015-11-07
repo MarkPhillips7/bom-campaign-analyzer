@@ -1,9 +1,9 @@
 # bom-campaign-analyzer
 
-Based on [aurelia-skeleton-navigation](https://github.com/aurelia/skeleton-navigation).
-
 Aurelia app for wireless telecom company to import sim card provisioning info for analysis, export data for reprocessing, etc.
-This source code includes user interface code with all back end services and data faked.
+This source code includes user interface code with all back end services and data faked. Check out [demo](http://markphillips7.github.io/bom-campaign-analyzer/).
+
+Based on [aurelia-skeleton-navigation](https://github.com/aurelia/skeleton-navigation).
 
 [![ZenHub](https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png)](https://zenhub.io)
 [![Join the chat at https://gitter.im/aurelia/discuss](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aurelia/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
