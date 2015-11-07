@@ -1,0 +1,211 @@
+<template>
+  <section class="au-animate">
+    <h4 class="pull-right">Current Environment: <span class="bom-green">${environment}</span></h4>
+
+    <div>
+      <div show.bind="errorMessage">
+        <div class="top-buffer"></div>
+        <div class="alert alert-danger" role="alert"><strong>Yikes! </strong>
+          <pre>${errorMessage}</pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-2">
+          <img class="col-sm-5 col-sm-offset-7" src="dist/Info_Right.png"/>
+        </div>
+
+        <h2 class="col-sm-8">Help with the BOM Campaign Analyzer</h2>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+          <div style="width:650px;font-family:Helvetica Neue, Helvetica, Arial;padding:20px;">
+		  <h3>Overview</h3>
+		  <p>
+		  The BOM Campaign Analyzer (BCA) provides two core functions:
+		  <ol>
+			<li>
+			<strong>IMSI Analysis</strong>. The BCA allows you to import lists of IMSIs. As soon as each IMSI in a list is imported the BCA analyzes it and flags it with one of the following statuses:
+            <ul>
+              <li>
+                <strong>Successful:</strong> Indicates that the IMSI was successfully processed by the BOM Platform. Note: All IMSIs (and only IMSIs) uploaded using the <em>Successful IMSIs</em> Import Type will be flagged as <em>Successful.</em>
+              </li>
+              <li>
+                <strong>Reprocess:</strong> Indicates that the IMSI is not dead yet and should be submitted again to the BOM Platform for another try.
+              </li>
+              <li>
+                <strong>Do Not Reprocess:</strong> This status is also referred to as <em>Record.</em> It means that the
+                IMSI appears to be deprovisioned and is not likely to ever be provisioned again. You should not resubmit
+                this IMSI to the BOM Platform.
+              </li>
+            </ul>
+			</li>
+			<li>
+			<strong>SLD Export</strong>. You can export IMSIs flagged as "Reprocess" to an SLD file that you can then submit to the BOM Platform.
+			</li>	
+			</li>
+		  </ol>
+		  </p>
+		  <p>
+		  An IMSI's BCA Status is always the result of its most recent import. If you want to adjust an IMSI's status, just import it again. This can be used to correct oversights. For example, if you mistakenly import a file as "Failed IMSIs" when you actually meant to import it as "Expired IMSIs" you can easily remedy the problem by simply importing the file again and choosing the correct Import Type. The BCA will rerun it's analysis on the imported IMSI's and set each IMSI's status accordingly.
+		  </p>
+            <h3>Analyzing Campaign Results</h3>
+
+            <p>
+              To analyze the IMSIs in an <strong>SLD file</strong> that's related to a BOM campaign, import the file using
+              the <strong>Analyze Campaign Results</strong> tab.
+            <ol>
+              <li>Choose the correct Campaign from the <strong>Campaign</strong> dropdown list.
+                <ul>
+                  <li>If the Campaign you want isn't in the list, click the <strong>Add New Campaign</strong> button to
+                    create it. As soon as you create a new Campaign it will appear as the selected Campaign in the
+                    <strong>Campaign</strong> list.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Choose the correct <strong>Results Type</strong>:
+                <ul>
+                  <li>
+                    <strong>Expired IMSIs:</strong> These are IMSIs that the BOM Platform has flagged as
+                    <em>Expired.</em>
+                  </li>
+                  <li>
+                    <strong>Failed IMSIs:</strong> These are IMSIs that the BOM Platform has flagged as <em>Failed.</em>
+                  </li>
+                  <li>
+                    <strong>Successful IMSIs:</strong> These are IMSIs that the BOM Platform has <em>successfully
+                    processed.</em>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Choose an <strong>SLD File</strong> from your workstation or from a network drive that you have access
+                to. The SLD file can contain IMSIs prefixed with "089" as well as IMSIs that do not have the "089"
+                prefix.
+              </li>
+              <li>
+                Add any <strong>Notes</strong> you think might be helpful later when you review the history of the SLD
+                import.
+              </li>
+              <li>
+                Click the <strong>Import Campaign Results for Analysis</strong> button.
+              </li>
+            </ol>
+            </p>
+            <p>
+              The BCA will ask you to confirm the action; when you do it will upload the SLD file to
+              the server and immediately analyze each IMSI in the file. 
+            </p>
+            <p>
+              Depending on how many IMSIs are in the SLD file, the BCA will typically finish its work
+              in 5 to 45 seconds. It will notify you via email when the analysis is complete.</strong>
+            </p>
+
+            <h3>Analyzing OPM Variances</h3>
+
+            <p>
+              Use the <strong>Analyze OPM Variances</strong> tab to analyze IMSIs that are the result of an OPM Variance
+              query.
+            <ol>
+              <li>
+                Choose the appropriate <strong>Variance Type:</strong>
+                <ul>
+                  <li><strong>In HSS Not OPM:</strong> Use this for IMSIs that are in the HSS but not in the OPM.</li>
+                  <li><strong>In OPM Not HSS:</strong> Use this for IMSIs that are in the OPM but not in the HSS.</li>
+                </ul>
+              <li>
+                Choose an <strong>Excel File</strong> from your workstation or from a network drive that you have access
+                to. The Excel file should contain a single worksheet with a single column of IMSIs.
+              </li>
+              <li>
+                Add any <strong>Notes</strong> that might be helpful later when you review the history of the SLD
+                import.
+              </li>
+              <li>
+                Click the <strong>Upload OPM Variances for Analysis</strong> button.
+              </li>
+            </ol>
+            </p>
+            <p>
+              The BCA will ask you to confirm the action; when you do it will upload the Excel file to
+              the server and immediately analyze each IMSI in the file.
+            </p>
+            <p>
+              Depending on how many IMSIs are in the SLD file, the BCA will typically finish its work
+              in 5 to 45 seconds. It will notify you via email when the analysis is complete.</strong>
+            </p>
+
+            <h3>Viewing the IMSI Analysis History</h3>
+
+            <p>
+              Use the <strong>IMSI Analysis History</strong> tab to review the history of all SLD and OPM Variance 
+              imports. This tab will display two grids of data, one for the OPM Variance files that have been
+              uploaded and another for the SLD files that have been uploaded. The data in each
+              grid is sorted so that the most recent records are at the top.
+			</p>
+			<p>
+              Each grid will display the type of the upload, how many IMSIs were imported and how many IMSIs had their status <strong>changed</strong> to <em>Reprocess</em> or <em>Do Not Reprocess</em>. 
+			</p>
+			<p>
+              Each grid will also allow you to to export the results of the analysis to Excel. For each IMSI that was
+              uploaded for analysis, the Excel file will include the following columns:
+            <ul>
+			  <li><strong>Import ID:</strong> The unique ID that identifies the import. Will be the same for each record in the Excel file.</li>
+			  <li><strong>Import Type:</strong> Will be the same for each record in the Excel file.</li>
+              <li><strong>IMSI</strong></li>
+              <li><strong>Current BOM Campaign Analyzer Status:</strong> This column is real-time and respresents the IMSI's <strong>current</strong> BCA status, <strong>not</strong> the status assigned to it at the time of the import.
+              </li>
+              <li><strong>Current HLRALL Status:</strong> Indicates whether the IMSI is in <em>currently</em> in the
+                HLRALL. This column is real-time and represents the IMSI's current HLRALL status, not its HLRALL status at the time of the import when
+                the analysis was performed.
+              </li>
+              <li><strong>Date and Time of the Import</strong>
+            </ul>
+            </p>
+
+            <h3>Exporting IMSIs for Reprocessing by the BOM Platform</h3>
+
+            <p>
+              Use the <strong>Export IMSIs for Reprocessing</strong> tab to generate an SLD file of IMSIs that can be submitted to the BOM Platform. You can only export IMSIs that have been marked as "Reprocess." There are three export options on this page:
+			  <ul>
+				<li>
+				Export all IMSIs in the BCA database that have been marked as "Reprocess." Note that this could be a very large number of IMSIs.
+				</li>
+				<li>
+				Export all IMSIs in the BCA database were imported as OPM Variances and are now marked as "Reprocess." 
+				</li>
+				<li>
+				Export IMSIs that were imported from SLD files and are now marked as "Reprocess."  Chose specific campaigns, or all campaigns.</li>
+				</li>
+			  </ul>
+            </p>
+			<p>
+			Once you've chosen the IMSIs you want to export you can export them to an Excel file to preview them. When you're ready to generate an SLD file, click the <strong>Export to SLD File</strong>, fill in the fields in the "Enter SLD Properties" dialog box and click the <strong>Generate SLD File</strong> button.
+			</p>
+
+            <h3>Viewing the SLD Export History</h3>
+
+            <p>
+			The <strong>SLD Export History</strong> page displays a list of all SLDs that users have generated. This page does not record the event when you export IMSIs to an Excel spreadsheet.
+            </p>
+
+            <h3>Using the IMSI Lookup Tool</h3>
+
+            <p>
+              The <strong>IMSI Lookup</strong> tab displays two grids of historical information for a specific IMSI as well as the IMSI's current BCA status and whether it's currently in the HLRALL. Each of the two grids display the most current record at the top of the grid.
+            </p>
+			<p>
+			The first grid displays the IMSI's <strong>BOM Campaign Analyzer History</strong>. If the IMSI has never been imported into the BCA this grid will be empty. This grid only shows the history of imports; it doesn't include exports.
+			</p>
+			<p>
+			The second grid displays the IMSI's <strong>Serial Number Tracking History</strong>. This grid will always display at least one record if the IMSI is in the "IMSI database" (that is, the POSS.SerialNumberTracking.SimCardSerialNumber table).
+			</p>
+          </div>
+          <!--/div to set width-->
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

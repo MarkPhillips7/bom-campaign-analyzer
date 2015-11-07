@@ -1,0 +1,10 @@
+<template>
+  <require from="nav-bar.html"></require>
+  <require from="bootstrap/css/bootstrap.css"></require>
+
+  <nav-bar router.bind="router" auth.bind="auth"></nav-bar>
+
+  <div class="page-host">
+    <router-view environment.bind="environment"></router-view>
+  </div>
+</template>

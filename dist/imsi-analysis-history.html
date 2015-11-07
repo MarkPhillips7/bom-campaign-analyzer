@@ -1,0 +1,221 @@
+<template>
+  <require from="./date-format"></require>
+  <section class="au-animate">
+    <h4 class="pull-right">Current Environment: <span class="bom-green">${environment}</span></h4>
+
+    <div class="pull-left">
+      <div show.bind="errorMessage">
+        <div class="top-buffer"></div>
+        <div class="alert alert-danger" role="alert"><strong>Yikes! </strong>
+          <pre>${errorMessage}</pre>
+        </div>
+      </div>
+
+      <h2>Current Status of All Imported IMSIs
+        <button type="button" class="btn btn-primary" click.delegate="refreshCurrentStatusForAllImsis()">Refresh Data</button>
+      </h2>
+
+      <grid id="current-status-for-all-imsis-grid"
+            read.call="fetchCurrentStatusForAllImsis($event)"
+            server-filtering.bind="true"
+            pageable.bind="false"
+            sortable.bind="false"
+            no-rows-message="Sorry, no current status results found">
+        <grid-row>
+          <grid-col class="col-sm-1" heading="Total IMSIs in BCA Database" field="totalImsis">
+            ${ $item.totalImsis | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Flagged for Reprocessing" field="numberFlaggedForReprocessing">
+            ${ $item.numberFlaggedForReprocessing | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Marked As Record" field="numberMarkedAsRecord">
+            ${ $item.numberMarkedAsRecord | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Marked As Successfully Processed" field="numberMarkedAsSuccessful">
+            ${ $item.numberMarkedAsSuccessful | numberFormat:'0,0' }
+          </grid-col>
+        </grid-row>
+      </grid>
+
+      <h2>OPM Variance Analysis History
+        <button type="button" class="btn btn-primary" click.delegate="refreshAnalysisHistory()">Refresh Data</button>
+      </h2>
+
+      <grid id="opm-analysis-history-grid"
+            read.call="fetchOpmAnalysisHistory($event)"
+            server-filtering.bind="true"
+            pageable.bind="false"
+            sortable.bind="false"
+            no-rows-message="Sorry, no OPM variance analysis records found">
+        <grid-row>
+          <grid-col class="col-sm-1" heading="Import ID" field="ImportId">${ $item.ImportId | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Date Imported" field="DateImported">${ $item.DateImported |
+            dateFormat:'M/D/YYYY h:mm:ss a'}
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Analysis Type" field="ImportType">${ $item.ImportType }</grid-col>
+          <grid-col class="col-sm-1" heading="No. IMSIs Imported" field="ImsiCount">${ $item.ImsiCount |
+            numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Updated to 'Reprocess'" field="ReprocessCount">${
+            $item.ReprocessCount
+            | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Updated to 'Record'" field="DoNotReprocessCount">${
+            $item.DoNotReprocessCount | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Imported By" field="CreateUser">${ $item.CreateUser }</grid-col>
+          <grid-col class="col-sm-1" heading="Export Results To Excel" field="ImportId">
+            <a show.bind="!$item.downloadStatus || $item.downloadStatus == 'error'"
+               click.delegate="$parent.$parent.exportItem($item)">Export</a>
+
+            <div show.bind="$item.downloadStatus == 'downloading'">
+              <i id="" class="fa fa-spinner fa-spin fa-2x"></i> Exporting
+            </div>
+            <span show.bind="$item.downloadStatus == 'error'">${$item.downloadError}</span>
+            <a show.bind="$item.downloadStatus == 'downloaded'" href.bind="$item.downloadUrl">Download</a>
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Notes" field="Description">${ $item.Notes}</grid-col>
+        </grid-row>
+      </grid>
+
+      <h2>Campaign Results Analysis History
+        <button type="button" class="btn btn-primary" click.delegate="refreshAnalysisHistory()">Refresh Data</button>
+      </h2>
+
+      <grid id="campaign-analysis-history-grid"
+            read.call="fetchCampaignAnalysisHistory($event)"
+            server-filtering.bind="true"
+            pageable.bind="false"
+            sortable.bind="false"
+            no-rows-message="Sorry, no campaign results analysis records found">
+        <grid-row>
+          <grid-col class="col-sm-1" heading="Import ID" field="ImportId">${ $item.ImportId | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Date Imported" field="DateImported">${ $item.DateImported |
+            dateFormat:'M/D/YYYY h:mm:ss a'}
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Analysis Type" field="ImportType">${ $item.ImportType }</grid-col>
+          <grid-col class="col-sm-1" heading="Campaign" field="Campaign">${ $item.Campaign}</grid-col>
+          <grid-col class="col-sm-1" heading="SLD Target Spec" field="TargetSpec">${ $item.TargetSpec }</grid-col>
+          <grid-col class="col-sm-1" heading="No. IMSIs Imported" field="ImsiCount">${ $item.ImsiCount |
+            numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Updated to 'Reprocess'" field="ReprocessCount">${
+            $item.ReprocessCount | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="No. Updated to 'Record'" field="DoNotReprocessCount">${
+            $item.DoNotReprocessCount | numberFormat:'0,0' }
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Imported By" field="CreateUser">${ $item.CreateUser }</grid-col>
+          <grid-col class="col-sm-1" heading="Export Results To Excel" field="ImportId">
+            <a show.bind="!$item.downloadStatus || $item.downloadStatus == 'error'"
+               click.delegate="$parent.$parent.exportItem($item)">Export</a>
+
+            <div show.bind="$item.downloadStatus == 'downloading'">
+              <i id="" class="fa fa-spinner fa-spin fa-2x"></i> Exporting
+            </div>
+            <span show.bind="$item.downloadStatus == 'error'">${$item.downloadError}</span>
+            <a show.bind="$item.downloadStatus == 'downloaded'" href.bind="$item.downloadUrl">Download</a>
+          </grid-col>
+          <grid-col class="col-sm-1" heading="View SLD Properties" field="ImportId">
+            <a click.delegate="$parent.$parent.viewSldProperties($item)">View</a>
+          </grid-col>
+          <grid-col class="col-sm-1" heading="Notes" field="Description">${ $item.Notes }</grid-col>
+        </grid-row>
+      </grid>
+
+
+      <div ref="modal" class="modal fade" id="view-sld-properties-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">SLD Properties</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" role="form">
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Target Spec</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.TargetSpec}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Format Version</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.FormatVersion}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">File Date</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.FileDate}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">File ID</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.FileIdentifier}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">WTS Format Version</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.WtsFormatVersion}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Description</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.Description}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Author</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.Author}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Checker</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.Checker}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Authorizer</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importDetails.Authoriser}</p>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

@@ -1,0 +1,213 @@
+<template>
+  <section class="au-animate">
+    <h4 class="pull-right">Current Environment: <span class="bom-green">${environment}</span></h4>
+
+    <div>
+      <div show.bind="errorMessage">
+        <div class="top-buffer"></div>
+        <div class="alert alert-danger" role="alert"><strong>Yikes! </strong>
+          <pre>${errorMessage}</pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2 class="col-sm-8 col-sm-offset-2">${heading}</h2>
+      </div>
+
+      <form class="form-horizontal" role="form" submit.delegate="submit()" id="sld-upload-form">
+
+        <div class="form-group ${imsisToExportValidationClass}">
+          <label class="col-sm-2 control-label">Select IMSIs to Export</label>
+
+          <div class="col-sm-5">
+            <div class="radio" repeat.for="imsiSelection of imsiSelections">
+              <label>
+                <input type="radio"
+                       name="imsi-selections"
+                       value.bind="imsiSelection"
+                       aurelia-autofocus
+                       change.delegate="$parent.validate()"
+                       checked.bind="$parent.imsisToExport"/>
+                ${imsiSelection}
+              </label>
+            </div>
+          </div>
+
+          <div class="col-sm-5">
+          <span show.bind="imsisToExportValidationClass === 'has-error'" id="imsiSelectionRequired"
+                class="help-block">An IMSI selection option must be selected.</span>
+          </div>
+        </div>
+
+
+        <div class="form-group ${campaignSelectionsValidationClass}"
+             show.bind="imsisToExport === imsisFromSelectedCampaigns">
+          <label class="col-sm-2 control-label">Select Campaigns</label>
+
+          <div class="col-sm-5">
+            <div class="checkbox" repeat.for="campaign of campaigns">
+              <label>
+                <input type="checkbox"
+                       model.bind="campaign"
+                       checked.bind="$parent.campaignSelections"
+                       change.delegate="$parent.validate()"/>${campaign.Name}
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-5">
+          <span show.bind="campaignSelectionsValidationClass === 'has-error'"
+                id="campaignSelectionRequired"
+                class="help-block">At least one campaign must be selected.</span>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-5">
+            <div class="col-sm-4">
+              <a href="#">
+                <button type="button" class="form-control btn btn-primary" click.delegate="exportToSld()"
+                        disabled.bind="userStillNeedsToClickDownloadLink">Export to SLD File
+                </button>
+              </a>
+            </div>
+            <div class="col-sm-4">
+              <button type="button" class="form-control btn btn-primary" click.delegate="exportToExcel()"
+                      disabled.bind="userStillNeedsToClickDownloadLink">Export to Excel
+              </button>
+            </div>
+          </div>
+          <div show.bind="showValidationErrors && !isValid" class="col-sm-5 has-error">
+            <div class="help-block" role="alert">Please make the required changes and try again.</div>
+          </div>
+        </div>
+        <div class="col-sm-5 col-sm-offset-2">
+          <div class="col-sm-4 ${linkOffsetClass}" style="border: 1px thin black" id='download'>
+            <div show.bind="isDownloading">
+              <i id="" class="fa fa-spinner fa-spin fa-2x"></i> Downloading file
+            </div>
+            <a show.bind="isDownloadReady" href.bind="downloadUrl" click.delegate="downloadClicked($event)">Click here
+              to download file.</a>
+            <input style="border: 0; width: 300px;" show.bind="isDownloadError" type="text" value.bind="downloadError">
+          </div>
+        </div>
+      </form>
+
+      <div ref="modal" class="modal fade" id="enter-sld-properties-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Enter SLD Properties</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" role="form">
+
+                <div class="form-group ${targetSpecValidationClass}">
+                  <label class="col-sm-4 control-label" for="target-spec">Target Spec</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="targetSpec" class="form-control" id="target-spec"
+                           autofocus change.delegate="validateSldProperties()">
+                  <span show.bind="targetSpecValidationClass === 'has-error'" id="targetSpecRequired"
+                        class="help-block">A target spec must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Format Version</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${formatVersion}</p>
+                  </div>
+                </div>
+
+                <div class="form-group ${fileDateValidationClass}">
+                  <label class="col-sm-4 control-label" for="file-date">File Date</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="fileDate" class="form-control" id="file-date"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="fileDateValidationClass === 'has-error'" id="fileDateRequired"
+                        class="help-block">A file date must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group ${fileIdValidationClass}">
+                  <label class="col-sm-4 control-label" for="file-id">File ID</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="fileId" class="form-control" id="file-id"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="fileIdValidationClass === 'has-error'" id="fileIdRequired"
+                        class="help-block">A file id must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">WTS Format Version</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${wtsFormatVersion}</p>
+                  </div>
+                </div>
+
+                <div class="form-group ${descriptionValidationClass}">
+                  <label class="col-sm-4 control-label" for="description">Description</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="description" class="form-control" id="description"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="descriptionValidationClass === 'has-error'" id="descriptionRequired"
+                        class="help-block">A description must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group ${authorValidationClass}">
+                  <label class="col-sm-4 control-label" for="author">Author</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="author" class="form-control" id="author"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="authorValidationClass === 'has-error'" id="authorRequired"
+                        class="help-block">An author must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group ${checkerValidationClass}">
+                  <label class="col-sm-4 control-label" for="checker">Checker</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="checker" class="form-control" id="checker"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="checkerValidationClass === 'has-error'" id="checkerRequired"
+                        class="help-block">A checker must be entered.</span>
+                  </div>
+                </div>
+
+                <div class="form-group ${authorizerValidationClass}">
+                  <label class="col-sm-4 control-label" for="authorizer">Authorizer</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="authorizer" class="form-control" id="authorizer"
+                           change.delegate="validateSldProperties()">
+                  <span show.bind="authorizerValidationClass === 'has-error'" id="authorizerRequired"
+                        class="help-block">An authorizer must be entered.</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" click.delegate="generateSldFile()">Generate SLD File
+              </button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+

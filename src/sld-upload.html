@@ -1,0 +1,205 @@
+<template>
+  <section class="au-animate">
+    <h4 class="pull-right">Current Environment: <span class="bom-green">${environment}</span></h4>
+
+    <div>
+      <div show.bind="errorMessage">
+        <div class="top-buffer"></div>
+        <div class="alert alert-danger" role="alert"><strong>Yikes! </strong>
+          <pre>${errorMessage}</pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2 class="col-sm-4 col-sm-offset-2">${heading}</h2>
+      </div>
+
+      <form class="form-horizontal" role="form" submit.delegate="submit()" id="sld-upload-form">
+
+        <div class="form-group ${campaignIdValidationClass}">
+          <label class="col-sm-2 control-label" for="campaign">Campaign</label>
+
+          <div class="col-sm-5">
+            <select name="CampaignId"
+                    value.bind="campaignId"
+                    class="form-control" id="campaign"
+                    aurelia-autofocus
+                    change.delegate="validate()">
+              <option>${campaignNotSelected}</option>
+              <option repeat.for="campaign of campaigns" value.bind="campaign.Id">${campaign.Name}</option>
+            </select>
+          </div>
+
+          <div class="col-sm-2">
+            <button type="button" class="form-control btn btn-success"
+                    id="add-campaign" data-toggle="modal" data-target="#create-campaign-modal">
+              Add New Campaign
+            </button>
+          </div>
+
+          <div class="col-sm-3">
+          <span show.bind="campaignIdValidationClass === 'has-error'" id="campaignRequired"
+                class="help-block">A campaign must be selected or added.</span>
+          </div>
+        </div>
+
+
+        <div class="form-group ${importTypeIdValidationClass}">
+          <label class="col-sm-2 control-label" for="import-type">Results Type</label>
+
+          <div class="col-sm-5">
+            <select name="ImportTypeId"
+                    value.bind="importTypeId" class="form-control" id="import-type"
+                    change.delegate="validate()">
+              <option>${importTypeNotSelected}</option>
+              <option repeat.for="importType of importTypes" value.bind="importType.Id">${importType.Name}</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+          <span show.bind="importTypeIdValidationClass === 'has-error'" id="importTypeRequired"
+                class="help-block">A result type must be selected.</span>
+          </div>
+        </div>
+
+
+        <div class="form-group ${fileValidationClass}">
+          <label class="col-sm-2 control-label" for="choose-file">SLD File</label>
+
+          <div class="col-sm-5">
+          <span class="btn btn-default btn-file">
+            Choose File <input name="Filename" type="file" id="choose-file" files.bind="files"
+                               change.delegate="fileSelected($event)">
+          </span>
+            <span>${filePath || 'No file chosen'}</span>
+          </div>
+          <div class="col-sm-5">
+          <span show.bind="fileValidationClass === 'has-error'" id="fileRequired"
+                class="help-block">${fileInvalidMessage}</span>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="notes">Notes</label>
+
+          <div class="col-sm-5">
+            <textarea name="Notes" value.bind="notes" class="form-control" id="notes"></textarea>
+          </div>
+          <div class="col-sm-5"></div>
+        </div>
+
+
+        <div class="form-group">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-3">
+            <button type="submit" class="form-control btn btn-primary">Import Campaign Results for Analysis</button>
+          </div>
+          <div show.bind="showValidationErrors && !isValid" class="col-sm-5 has-error">
+            <div class="help-block" role="alert">Please make the required changes and try again.</div>
+          </div>
+        </div>
+      </form>
+
+
+      <div ref="modal" class="modal fade" id="create-campaign-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Add Campaign</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" role="form">
+                <div class="form-group ${campaignNameValidationClass}">
+                  <label class="col-sm-4 control-label" for="campaign-name">Campaign Name</label>
+
+                  <div class="col-sm-8">
+                    <input type="text" value.bind="campaignNameToAdd" class="form-control" id="campaign-name"
+                           autofocus change.delegate="validateAddCampaign()">
+                  </div>
+                  <div class="col-sm-offset-4">
+                  <span show.bind="campaignNameValidationClass === 'has-error'" id="campaignNameRequired"
+                        class="help-block">A campaign name must be entered.</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" click.delegate="createCampaign()">Add Campaign</button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div ref="are-you-sure-modal" class="modal fade" id="are-you-sure-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+              <p>You have selected the following:</p>
+
+              <form class="form-horizontal" role="form">
+                <div class="form-group">
+                  <label class="col-sm-4 control-label">Campaign</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${campaignName}</p>
+                  </div>
+
+                  <label class="col-sm-4 control-label">Results Type</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${importTypeName}</p>
+                  </div>
+
+                  <label class="col-sm-4 control-label">SLD File</label>
+
+                  <div class="col-sm-8">
+                    <p class="form-control-static">${filePath}</p>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-success" data-dismiss="modal" click.delegate="uploadSldFile()">
+                Yes - Upload SLD for Analysis
+              </button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal">No - Go Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="file-upload-succeeded-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Campaign results successfully imported</h4>
+            </div>
+            <div class="modal-body">
+              <p><strong>IMSIs have been uploaded for analysis and processing has begun.</strong></p>
+              <ul>
+                <li>All IMSIs imported in <i>Success</i> files will be marked as "Record"</li>
+                <li>All IMSIs imported in <i>Expired</i> or <i>Failed</i> files will be analyzed individually</li>
+              </ul>
+              <p>The BOM Campaign Analyzer will send an email when processing is complete.</p>
+              <strong>Note:</strong>
+              You may check the <i>IMSI Analysis History</i> tab at any time to view the status of this import.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
